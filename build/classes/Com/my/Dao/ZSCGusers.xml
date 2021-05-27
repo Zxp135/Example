@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="Com.my.Dao.ZSCGusers">
+
+<select id="selectALL" resultMap="result">
+select p.*,u.username,u.password
+from s_userinfo p,userinfo u where p.userid=u.id
+</select>
+
+<resultMap type="Users" id="result">
+<id property="id" column="id"/>
+<result property="s_number" column="s_number"/>
+<result property="s_sex" column="s_sex"/>
+<result property="workfor" column="workfor"/>
+<association property="customer" javaType="Customer" >
+<id property="id" column="userid" />
+<result  property="username" column="username"/>
+<result  property="password" column="password"/>
+</association>
+</resultMap>
+<!-- 模糊查询 -->
+<sql id="findindex">
+ <where>
+ <if test="s_number!=null or username!=null or workfor!=null">p.userid=u.id </if>
+ <if test="s_number!=null">and p.s_number like #{s_number}</if>
+ <if test="username!=null"> and u.username like #{username}</if>
+ <if test="workfor!=null">and p.workfor  like #{workfor}</if>
+ </where>
+ </sql>
+<select id="selectSomeBody" parameterType="UserAndCustomer" resultMap="result1">
+select p.*,u.username,u.password
+from s_userinfo p,userinfo u 
+<include refid="findindex"></include>
+</select>
+<resultMap type="UserAndCustomer" id="result1">
+<id property="id" column="id"/>
+<result property="s_number" column="s_number"/>
+<result property="s_sex" column="s_sex"/>
+<result property="workfor" column="workfor"/>
+<association property="customer" javaType="Customer" >
+<id property="id" column="userid" />
+<result  property="username" column="username"/>
+<result  property="password" column="password"/>
+</association>
+</resultMap>
+<!-- 删除 -->
+<delete id="deleteuser" parameterType="UserAndCustomer">
+ delete p.*,o.* from s_userinfo p ,userinfo o  where p.s_number=#{s_number} and o.username=#{username} 
+ </delete>
+ <!-- 修改 -->
+ <update id="UPDATUser" parameterType="Users">
+ update s_userinfo o,userinfo p set o.s_number=#{s_number},o.workfor=#{workfor},o.s_sex=#{s_sex},
+ p.username=#{username},p.password=#{password} where o.id=#{id} and p.id=#{uid}
+ </update>
+</mapper>
